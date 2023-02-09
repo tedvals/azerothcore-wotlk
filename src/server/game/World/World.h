@@ -440,14 +440,11 @@ private:
     LockedQueue<WorldSession*> _addSessQueue;
 
     // used versions
-<<<<<<< HEAD
-    std::string m_DBVersion;
+    std::string _dbVersion;
+
 #ifdef MOD_PLAYERBOTS
     std::string m_PlayerbotsDBRevision;
 #endif
-=======
-    std::string _dbVersion;
->>>>>>> c3dd1b7a5ca0a9945d609213fdd3c4a19e0106e2
 
     typedef std::map<uint8, std::string> AutobroadcastsMap;
     AutobroadcastsMap _autobroadcasts;
