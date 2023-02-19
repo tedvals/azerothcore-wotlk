@@ -16565,7 +16565,8 @@ void bot_ai::AfterBotOwnerEnterVehicle()
             //    break;
             case CREATURE_TOC5_WARHORSE:
             case CREATURE_TOC5_BATTLEWORG:
-                me->CastSpell(veh, 67830); //Ride Vehicle
+                //me->CastSpell(veh, 67830); //Ride Vehicle
+                me->EnterVehicleUnattackable(veh);
                 break;
             default:
                 me->EnterVehicle(veh);

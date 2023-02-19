@@ -509,9 +509,30 @@ public:
         return commandTable;
     }
 
+    static bool HandleNpcBotDebugSpellsCommand(ChatHandler* handler)
+    {
+        //Unit* target = handler->getSelectedUnit();
+            //if (!target)
+            //{
+            //    handler->SendSysMessage("No target selected");
+            //    return true;
+            //}
+
+            //std::ostringstream ostr;
+            //ostr << "Listing spells for " << target->GetName() << ':';
+            //for (uint8 i = 0; i < CURRENT_MAX_SPELL; ++i)
+            //{
+            //    if (Spell const* curSpell = target->GetCurrentSpell(CurrentSpellTypes(i)))
+            //        ostr << "\nSpell type " << uint32(i) << ":\n" << curSpell->GetDebugInfo();
+            //}
+
+            //handler->SendSysMessage(ostr.str().c_str());
+        return true;
+    }
+
     static bool HandleNpcBotDebugStatesCommand(ChatHandler* handler)
     {
-        Unit* target = handler->getSelectedUnit();
+        Unit const* target = handler->getSelectedUnit();
         if (!target)
         {
             handler->SendSysMessage("No target selected");
