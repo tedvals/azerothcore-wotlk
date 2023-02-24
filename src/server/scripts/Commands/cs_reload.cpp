@@ -401,7 +401,7 @@ public:
     static bool HandleReloadAutobroadcastCommand(ChatHandler* handler)
     {
         LOG_INFO("server.loading", "Re-Loading Autobroadcasts...");
-        sWorld->LoadAutobroadcasts();
+        sAutobroadcastMgr->LoadAutobroadcasts();
         handler->SendGlobalGMSysMessage("DB table `autobroadcast` reloaded.");
         return true;
     }
