@@ -1912,8 +1912,11 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Groups...");
     sGroupMgr->LoadGroups();
 
-    LOG_INFO("server.loading", "Loading ReservedNames...");
+    LOG_INFO("server.loading", "Loading Reserved Names...");
     sObjectMgr->LoadReservedPlayersNames();
+
+    LOG_INFO("server.loading", "Loading Profanity Names...");
+    sObjectMgr->LoadProfanityPlayersNames();
 
     LOG_INFO("server.loading", "Loading GameObjects for Quests...");
     sObjectMgr->LoadGameObjectForQuests();
@@ -3219,14 +3222,14 @@ void World::LoadDBVersion()
     {
         Field* fields = result->Fetch();
 
-        _dbVersion = fields[0].Get<std::string>();
+        m_DBVersion = fields[0].Get<std::string>();
 
         // will be overwrite by config values if different and non-0
         _int_configs[CONFIG_CLIENTCACHE_VERSION] = fields[1].Get<uint32>();
     }
 
-    if (_dbVersion.empty())
-        _dbVersion = "Unknown world database.";
+    if (m_DBVersion.empty())
+        m_DBVersion = "Unknown world database.";
 }
 
 void World::UpdateAreaDependentAuras()

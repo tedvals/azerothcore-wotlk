@@ -102,10 +102,6 @@ enum class GameObjectActions : uint32
     UseArtKit3,                     // Use ArtKit3
     SetTapList,                     // Set Tap List
 };
-
-typedef std::vector<uint32> GameObjectQuestItemList;
-typedef std::unordered_map<uint32, GameObjectQuestItemList> GameObjectQuestItemMap;
-
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
 // For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
 // For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...
