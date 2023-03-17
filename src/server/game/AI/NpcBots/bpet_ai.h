@@ -51,6 +51,10 @@ class bot_pet_ai : public CreatureAI
         bool IsOffTank(Unit const* unit) const;
         bool IAmFree() const;
 
+        //wandering bots
+        bool IsWanderer() const { return _wanderer; }
+        void SetWanderer() { if (IAmFree()) _wanderer = true; }
+
         static bool CCed(Unit const* target, bool root = false);
 
         inline void SetShouldUpdateStats() { shouldUpdateStats = true; }
@@ -155,6 +159,9 @@ class bot_pet_ai : public CreatureAI
         mutable uint32 waitTimer;
 
         float _energyFraction;
+
+        //wandering bots
+        bool _wanderer;
 
         bool shouldUpdateStats;
 

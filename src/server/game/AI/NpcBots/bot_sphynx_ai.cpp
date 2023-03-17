@@ -172,6 +172,8 @@ public:
             if (!CheckAttackTarget())
                 return;
 
+            CheckUsableItems(diff);
+
             Attack(diff);
         }
 
@@ -193,7 +195,7 @@ public:
             if (GC_Timer > diff)
                 return;
 
-            if (me->GetDistance(mytar) > 20)
+            if (me->GetDistance(mytar) > 30)
                 return;
 
             if (me->isMoving() && !me->HasInArc(float(M_PI)/2, mytar))
