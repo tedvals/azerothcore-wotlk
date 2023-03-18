@@ -10882,16 +10882,16 @@ bool bot_ai::_canGenerateEquipmentInSlot(uint8 slot, bool empty_only) const
                 return false;
             [[fallthrough]];
         case BOT_SLOT_NECK:
-            if (me->GetLevel() < 25)
+            if (me->GetLevel() < 15)
                 return false;
             [[fallthrough]];
         case BOT_SLOT_FINGER1:
         case BOT_SLOT_FINGER2:
-            if (me->GetLevel() < 20)
+            if (me->GetLevel() < 12)
                 return false;
             [[fallthrough]];
         case BOT_SLOT_BACK:
-            if (me->GetLevel() < 10)
+            if (me->GetLevel() < 9)
                 return false;
             switch (_botclass)
             {
