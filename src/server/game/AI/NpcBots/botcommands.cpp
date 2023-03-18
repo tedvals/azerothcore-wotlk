@@ -19,6 +19,7 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "Spell.h"
 #include "Vehicle.h"
 #include "World.h"
 #include "WorldDatabase.h"
@@ -436,6 +437,7 @@ public:
         static ChatCommandTable npcbotRecallCommandTable =
         {
             { "",           HandleNpcBotRecallCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
+            { "spawns",     HandleNpcBotRecallSpawnsCommand,        rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
             { "teleport",   HandleNpcBotRecallTeleportCommand,      rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
         };
 
@@ -508,7 +510,7 @@ public:
         return commandTable;
     }
 
-/*
+    /*
     static bool HandleNpcBotDebugExportWMap(ChatHandler* handler, uint32 prefix)
     {
         std::string wmap_tablename = "creature_wmap_" + std::to_string(prefix);
@@ -570,21 +572,21 @@ public:
     static bool HandleNpcBotDebugSpellsCommand(ChatHandler* handler)
     {
         //Unit* target = handler->getSelectedUnit();
-            //if (!target)
-            //{
-            //    handler->SendSysMessage("No target selected");
-            //    return true;
-            //}
+        //if (!target)
+        //{
+        //    handler->SendSysMessage("No target selected");
+        //    return true;
+        //}
 
-            //std::ostringstream ostr;
-            //ostr << "Listing spells for " << target->GetName() << ':';
-            //for (uint8 i = 0; i < CURRENT_MAX_SPELL; ++i)
-            //{
-            //    if (Spell const* curSpell = target->GetCurrentSpell(CurrentSpellTypes(i)))
-            //        ostr << "\nSpell type " << uint32(i) << ":\n" << curSpell->GetDebugInfo();
-            //}
+        //std::ostringstream ostr;
+        //ostr << "Listing spells for " << target->GetName() << ':';
+        //for (uint8 i = 0; i < CURRENT_MAX_SPELL; ++i)
+        //{
+        //    if (Spell const* curSpell = target->GetCurrentSpell(CurrentSpellTypes(i)))
+        //        ostr << "\nSpell type " << uint32(i) << ":\n" << curSpell->GetDebugInfo();
+        //}
 
-            //handler->SendSysMessage(ostr.str().c_str());
+        //handler->SendSysMessage(ostr.str().c_str());
         return true;
     }
 
@@ -786,7 +788,7 @@ public:
 
         for (std::decay_t<decltype(*bot_name)>::size_type i = 0u; i < bot_name->size(); ++i)
             if ((*bot_name)[i] == '_')
-            (*bot_name)[i] = ' ';
+                (*bot_name)[i] = ' ';
 
         auto canBotUseSpell = [=](Creature const* tbot, uint32 bspell) {
             //we ignore GCD for now
@@ -1156,40 +1158,40 @@ public:
 
     static bool HandleNpcBotGoCommand(ChatHandler* handler, Optional<uint32> creatureId)
     {
-        Player * player = handler->GetSession()->GetPlayer();
-        
-            if (!creatureId)
-            {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!creatureId)
+        {
             handler->SendSysMessage(".npcbot go #[ID]");
             handler->SendSysMessage("Teleports to npcbot's current location");
             handler->SetSentErrorMessage(true);
             return false;
-            }
-        
-            Creature const* bot = BotDataMgr::FindBot(*creatureId);
+        }
+
+        Creature const* bot = BotDataMgr::FindBot(*creatureId);
         if (!bot)
-            {
+        {
             handler->PSendSysMessage("NpcBot %u is not found!", *creatureId);
             handler->SetSentErrorMessage(true);
             return false;
-            }
-        
-            handler->PSendSysMessage(LANG_APPEARING_AT, bot->GetName().c_str());
-        
-            if (player->IsInFlight())
-            {
+        }
+
+        handler->PSendSysMessage(LANG_APPEARING_AT, bot->GetName().c_str());
+
+        if (player->IsInFlight())
+        {
             player->GetMotionMaster()->MovementExpired();
             player->CleanupAfterTaxiFlight();
-            }
+        }
         else
             player->SaveRecallPosition(); // save only in non-flight case
-        
+
         WorldLocation wloc = *bot;
         wloc.m_positionZ += 1.5f;
-        
+
         player->TeleportTo(wloc, TELE_TO_GM_MODE);
         return true;
-       }
+    }
 
     static bool HandleNpcBotSendToCommand(ChatHandler* handler, Optional<std::vector<std::string>> names)
     {
@@ -1251,7 +1253,7 @@ public:
         return return_success(handler, { count });
     }
 
-     static bool HandleNpcBotSendToLastCommand(ChatHandler* handler, Optional<std::vector<std::string>> names)
+    static bool HandleNpcBotSendToLastCommand(ChatHandler* handler, Optional<std::vector<std::string>> names)
     {
         static auto return_syntax = [](ChatHandler* chandler) -> bool {
             chandler->SendSysMessage("Syntax: .npcbot sendto last #names...");
@@ -1292,7 +1294,7 @@ public:
         {
             for (decltype(name)::size_type i = 0u; i < name.size(); ++i)
                 if (name[i] == '_')
-                  name[i] = ' ';
+                    name[i] = ' ';
 
             Creature const* bot = owner->GetBotMgr()->GetBotByName(name);
             if (bot && bot->IsAlive() && !bot->GetBotAI()->HasBotCommandState(BOT_COMMAND_FULLSTOP))
@@ -1352,7 +1354,7 @@ public:
         {
             for (decltype(name)::size_type i = 0u; i < name.size(); ++i)
                 if (name[i] == '_')
-                  name[i] = ' ';
+                    name[i] = ' ';
 
             Creature const* bot = owner->GetBotMgr()->GetBotByName(name);
             if (bot && bot->IsAlive())
@@ -1468,6 +1470,36 @@ public:
         return false;
     }
 
+    static bool HandleNpcBotRecallSpawnsCommand(ChatHandler* handler)
+    {
+        Player const* owner = handler->GetSession()->GetPlayer();
+
+        std::vector<ObjectGuid> botvec;
+        BotDataMgr::GetNPCBotGuidsByOwner(botvec, owner->GetGUID());
+        if (owner->HaveBot())
+            botvec.erase(std::remove_if(botvec.begin(), botvec.end(), [=](ObjectGuid botguid) { return owner->GetBotMgr()->GetBot(botguid); }), botvec.end());
+
+        uint32 recalled_count = 0;
+        for (ObjectGuid botguid : botvec)
+        {
+            if (Creature const* bot = BotDataMgr::FindBot(botguid.GetEntry()))
+            {
+                bot->GetBotAI()->ResetBotAI(BOTAI_RESET_FORCERECALL);
+                ++recalled_count;
+            }
+        }
+
+        if (recalled_count == 0)
+        {
+            handler->SendSysMessage(".npcbot recall spawns");
+            handler->SendSysMessage("Forces all your owned inactive npcbots to teleport to their spawn locations immediatelly");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        return true;
+    }
+
     static bool HandleNpcBotRecallTeleportCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
@@ -1549,9 +1581,9 @@ public:
         }
 
         Creature* bot = ubot->ToCreature();
-        if (!bot || !bot->IsNPCBot() || bot->GetBotAI()->IsWanderer())
+        if (!bot || !bot->IsNPCBot() || !bot->IsFreeBot())
         {
-            handler->SendSysMessage("You must select a non-wandering npcbot");
+            handler->SendSysMessage("You must select uncontrolled npcbot");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -1600,9 +1632,9 @@ public:
         }
 
         Creature* bot = ubot->ToCreature();
-        if (!bot || !bot->IsNPCBot())
+        if (!bot || !bot->IsNPCBot() || bot->GetBotAI()->IsWanderer())
         {
-            handler->SendSysMessage("You must select a npcbot");
+            handler->SendSysMessage("You must select a non-wandering npcbot");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -1692,7 +1724,6 @@ public:
         return true;
     }
     */
-
     static bool HandleNpcBotLookupCommand(ChatHandler* handler, Optional<uint8> botclass, Optional <bool> unspawned)
     {
         //this is just a modified '.lookup creature' command
@@ -2013,7 +2044,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotCreateNewCommand(ChatHandler* handler, Optional<std::string> name, Optional<uint8> bclass, Optional<uint8> race, Optional<uint8> gender, Optional<uint8> skin, Optional<uint8> face, Optional<uint8> hairstyle, Optional<uint8> haircolor, Optional<uint8> features, Optional<uint8> soundset) 
+    static bool HandleNpcBotCreateNewCommand(ChatHandler* handler, Optional<std::string> name, Optional<uint8> bclass, Optional<uint8> race, Optional<uint8> gender, Optional<uint8> skin, Optional<uint8> face, Optional<uint8> hairstyle, Optional<uint8> haircolor, Optional<uint8> features, Optional<uint8> soundset)
     {
         static auto const ret_err = [](ChatHandler* handler, bool report_ranges = false) {
             if (report_ranges)
@@ -2045,7 +2076,7 @@ public:
 
         for (std::decay_t<decltype(*name)>::size_type i = 0u; i < name->size(); ++i)
             if ((*name)[i] == '_')
-              (*name)[i] = ' ';
+                (*name)[i] = ' ';
 
         bool const can_change_appearance = (*bclass < BOT_CLASS_EX_START || *bclass == BOT_CLASS_ARCHMAGE);
 
@@ -2600,7 +2631,6 @@ public:
                 return return_success(handler, { bot->GetName() });
             }
             return return_syntax(handler);
-
         }
 
         uint32 count = 0;
@@ -2681,7 +2711,6 @@ public:
                 ++count;
                 owner->GetBotMgr()->UnbindBot(bot->GetGUID());
             }
-
         }
 
         if (count == 0)

@@ -155,6 +155,8 @@ class bot_ai : public CreatureAI
         uint32 GetLastZoneId() const { return _lastZoneId; }
         bool IsInHeroicOrRaid() const;
 
+        bool IAmFree() const;
+
         //wandering bots
         bool IsWanderer() const { return _wanderer; }
         void SetWanderer();
@@ -162,9 +164,7 @@ class bot_ai : public CreatureAI
         uint32 GetTravelNodeLast() const { return _travel_node_last; }
         void SetTravelNodeCur(uint32 nodeId) { _travel_node_cur = nodeId; }
         void SetTravelNodeLast(uint32 nodeId) { _travel_node_last = nodeId; }
-        uint32 GetNextTravelNode(Position & pos) const;
-
-        bool IAmFree() const;
+        uint32 GetNextTravelNode(Position& pos) const;
 
         static bool CCed(Unit const* target, bool root = false);
 

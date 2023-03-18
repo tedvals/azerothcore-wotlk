@@ -112,11 +112,9 @@ class NearestHostileUnitCheck
         NearestHostileUnitCheck(NearestHostileUnitCheck const&) = delete;
         explicit NearestHostileUnitCheck(Unit const* unit, float dist, bool magic, bot_ai const* m_ai, bool targetCCed, bool withSecondary) :
         me(unit), m_range(dist), byspell(magic), ai(m_ai), AttackCCed(targetCCed), checkSecondary(withSecondary)
-        {
-            free = ai->IAmFree(); berserk = free && ai->IsWanderer();
-        }
+        { free = ai->IAmFree(); berserk = free && ai->IsWanderer(); }
         explicit NearestHostileUnitCheck(Unit const* unit, float dist, bool magic, bot_ai const* m_ai) :
-            NearestHostileUnitCheck(unit, dist, magic, m_ai, true, false)
+        NearestHostileUnitCheck(unit, dist, magic, m_ai, true, false)
         {}
         uint32 operator()(Unit const* u)
         {
