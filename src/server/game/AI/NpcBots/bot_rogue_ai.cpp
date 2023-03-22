@@ -193,19 +193,19 @@ public:
         return new rogue_botAI(creature);
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         return creature->GetBotAI()->OnGossipHello(player, 0);
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
         if (bot_ai* ai = creature->GetBotAI())
             return ai->OnGossipSelect(player, creature, sender, action);
         return true;
     }
 
-    bool OnGossipSelectCode(Player* player, Creature* creature, uint32 sender, uint32 action, char const* code)
+    bool OnGossipSelectCode(Player* player, Creature* creature, uint32 sender, uint32 action, char const* code) override
     {
         if (bot_ai* ai = creature->GetBotAI())
             return ai->OnGossipSelectCode(player, creature, sender, action, code);
@@ -304,8 +304,6 @@ public:
             CheckBlind(diff);
             CheckPreparation(diff);
             CheckTricksOfTheTrade(diff);
-
-            CheckUsableItems(diff);
 
             Attack(diff);
         }
@@ -492,7 +490,6 @@ public:
                 }
             }
 
-            //Vanish (no GCD)
             if (mytar->IsControlledByPlayer() || me->GetHealthPct() < 25.f)
             {
                 //Vanish (no GCD)
@@ -501,7 +498,7 @@ public:
                     bool cast = false;
                     //case 1: restealth for opener
                     if (!hasnormalstun && duration < 500 && me->IsInCombat() && dist <= 5)
-                       cast = true;
+                        cast = true;
                     //case 2: evade casted spell
                     if (!cast)
                     {
