@@ -12739,7 +12739,6 @@ bool Player::isHonorOrXPTarget(Unit* victim) const
                 victim->IsPet() ||
                 victim->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP)
             return false;
-        }
     }
 
     return true;

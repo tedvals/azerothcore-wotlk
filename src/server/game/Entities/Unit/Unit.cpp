@@ -74,6 +74,7 @@
 #include <math.h>
 
 //npcbot
+#include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
 
@@ -14393,6 +14394,17 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
         controlled->SetInCombatState(PvP, enemy, duration);
     }
 
+    //npcbot: party combat hook
+    Player* playerOwner = nullptr;
+    if (IsPlayer() && ToPlayer()->HaveBot())
+        playerOwner = ToPlayer();
+    else if (IsNPCBotOrPet() && !ToCreature()->IsFreeBot())
+        playerOwner = ToCreature()->GetBotOwner();
+
+    if (playerOwner)
+        BotMgr::OnBotPartyEngage(playerOwner);
+    //end npcbot
+
     //npcbot: combatstate for bots
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HaveBot())
     {
@@ -14496,8 +14508,17 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         return false;
 
     //npcbot: can't attack unit if controlled by a GM (bots, pets, possible others)
-    if (target->IsControlledByPlayer() && target->GetFaction() == 35)
-        return false;
+    if (((IsNPCBotOrPet() && ToCreature()->IsFreeBot()) || (target->IsNPCBotOrPet() && target->ToCreature()->IsFreeBot())) &&
+        !IsFriendlyTo(target) && !target->IsFriendlyTo(this))
+    {
+        auto const* ft1 = sFactionTemplateStore.LookupEntry(GetFaction());
+        auto const* ft2 = sFactionTemplateStore.LookupEntry(target->GetFaction());
+        auto const* fe1 = ft1 ? sFactionStore.LookupEntry(ft1->faction) : nullptr;
+        auto const* fe2 = ft2 ? sFactionStore.LookupEntry(ft2->faction) : nullptr;
+        if ((IsNPCBotOrPet() && fe2 && fe2->CanHaveReputation() && ReputationMgr::ReputationToRank(BotDataMgr::GetBotBaseReputation(ToCreature(), fe2)) >= REP_NEUTRAL) ||
+            (target->IsNPCBotOrPet() && fe1 && fe1->CanHaveReputation() && ReputationMgr::ReputationToRank(BotDataMgr::GetBotBaseReputation(target->ToCreature(), fe1)) >= REP_NEUTRAL))
+            return false;
+    }
     //end npcbot
 
     // can't attack own vehicle or passenger
@@ -22600,7 +22621,7 @@ bool Unit::IsHighestExclusiveAuraEffect(SpellInfo const* spellInfo, AuraType aur
         AuraEffect const* existingAurEff = (*itr);
         ++itr;
 
-        if (sSpellMgr->CheckSpellGroupStackRules(spellInfo, existingAurEff->GetSpellInfo(), true, spellInfo->IsAffectingArea()) & SPELL_GROUP_STACK_FLAG_EFFECT_EXCLUSIVE)
+        if (sSpellMgr->CheckSpellGroupStackRules(spellInfo, existingAurEff->GetSpellInfo(), true, spellInfo->IsAffectingArea()) & SPELL_GROUP_STACK_FLAG_FORCED_STRONGEST)
         {
             int32 diff = abs(effectAmount) - abs(existingAurEff->GetAmount());
             if (!diff)

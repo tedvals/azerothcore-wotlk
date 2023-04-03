@@ -27,7 +27,7 @@ class bot_pet_ai : public CreatureAI
         void JustDied(Unit*) override;
         //virtual void KilledUnit(Unit* u);
         void AttackStart(Unit* u) override;
-        //virtual void EnterCombat(Unit* u) override;
+        //virtual void JustEngagedWith(Unit* u) override;
         void MoveInLineOfSight(Unit* /*u*/) override {}
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override;
         void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/, DamageEffectType /*damageType*/, SpellSchoolMask /*schoolMask*/) override { }
@@ -49,6 +49,7 @@ class bot_pet_ai : public CreatureAI
         virtual void ApplyBotPetSpellRadiusMods(SpellInfo const* /*spellInfo*/, float& /*radius*/) const {}
         bool IsTank(Unit const* unit) const;
         bool IsOffTank(Unit const* unit) const;
+
         bool IAmFree() const;
 
         //wandering bots
@@ -118,7 +119,6 @@ class bot_pet_ai : public CreatureAI
         virtual void CheckAttackState();
         void OnSpellHit(Unit* caster, SpellInfo const* spell);
 
-        void CheckAuras(bool force = false);
         virtual void InitPetSpells() {}
         virtual void ApplyPetPassives() const {}
 
@@ -158,10 +158,10 @@ class bot_pet_ai : public CreatureAI
         uint32 lastdiff, checkAurasTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
         mutable uint32 waitTimer;
 
-        float _energyFraction;
-
         //wandering bots
         bool _wanderer;
+
+        float _energyFraction;
 
         bool shouldUpdateStats;
 
