@@ -14335,6 +14335,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 
     if (PvP)
         m_CombatTimer = std::max<uint32>(GetCombatTimer(), std::max<uint32>(5500, duration));
+    //npcbot: non-PvP npcbots should use PvP rules
+    else if (enemy && enemy->IsNPCBotOrPet())
+        m_CombatTimer = std::max<uint32>(GetCombatTimer(), std::max<uint32>(5500, duration));
+    //end npcbot
     else if (duration)
         m_CombatTimer = std::max<uint32>(GetCombatTimer(), duration);
 
@@ -14397,14 +14401,17 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
     }
 
     //npcbot: party combat hook
-    Player* playerOwner = nullptr;
-    if (IsPlayer() && ToPlayer()->HaveBot())
-        playerOwner = ToPlayer();
-    else if (IsNPCBotOrPet() && !ToCreature()->IsFreeBot())
-        playerOwner = ToCreature()->GetBotOwner();
+    if (enemy)
+    {
+        Player const* playerOwner = nullptr;
+        if (enemy->IsPlayer() && enemy->ToPlayer()->HaveBot())
+            playerOwner = enemy->ToPlayer();
+        else if (enemy->IsNPCBotOrPet() && !enemy->ToCreature()->IsFreeBot())
+            playerOwner = enemy->ToCreature()->GetBotOwner();
 
-    if (playerOwner)
-        BotMgr::OnBotPartyEngage(playerOwner);
+        if (playerOwner)
+            BotMgr::OnBotPartyEngage(playerOwner);
+    }
     //end npcbot
 
     //npcbot: combatstate for bots
@@ -18805,6 +18812,11 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
 
             if (creature->GetLootMode())
                 loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+
+            //npcbot: spawn wandering bot kill reward
+            if (creature->IsNPCBot() && creature->IsWandererBot())
+                BotMgr::OnBotWandererKilled(creature, looter);
+            //end npcbot
 
             if (group)
             {
