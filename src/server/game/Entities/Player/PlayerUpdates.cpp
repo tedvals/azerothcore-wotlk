@@ -426,8 +426,7 @@ void Player::Update(uint32 p_time)
     }
 
     //NpcBot mod: Update
-    if (_botMgr)
-        _botMgr->Update(p_time);
+    _botMgr->Update(p_time);
     //end Npcbot
 
     sScriptMgr->OnAfterPlayerUpdate(this, p_time);
@@ -500,12 +499,11 @@ void Player::UpdateLocalChannels(uint32 newZone)
         {
             Channel* usedChannel = nullptr;
 
-            for (JoinedChannelsList::iterator itr = m_channels.begin();
-                 itr != m_channels.end(); ++itr)
+            for (Channel* channel : m_channels)
             {
-                if ((*itr)->GetChannelId() == i)
+                if (channel && channel->GetChannelId() == i)
                 {
-                    usedChannel = *itr;
+                    usedChannel = channel;
                     break;
                 }
             }
